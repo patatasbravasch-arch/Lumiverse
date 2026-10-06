@@ -6,7 +6,7 @@ ARG FRONTEND_REFRESH=unset
 RUN echo "ca-refresh: ${CA_REFRESH}" \
     && apt-get update \
     && apt-get install --no-install-recommends --no-install-suggests -y \
-       git ca-certificates smartmontools \
+       git ca-certificates smartmontools python3 python3-cryptography \
     && update-ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -48,7 +48,7 @@ ENV NODE_ENV=production \
 
 EXPOSE 7860
 VOLUME /app/data
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD bun run src/healthcheck.ts
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5m --retries=3 CMD bun run src/healthcheck.ts
 
 USER bun
-CMD ["bun", "run", "src/index.ts"]
+CMD ["python3", "src/drive_backup.py"]
