@@ -1,6 +1,6 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bookmark, Download, Upload, Code2 } from 'lucide-react'
+import { Bookmark, Download, Upload, Code2, Lock, Unlock } from 'lucide-react'
 import { useStore } from '@/store'
 import { useThemePackActions } from '@/hooks/useThemePackActions'
 import { DEFAULT_THEME, normalizeTheme } from '@/theme/presets'
@@ -17,6 +17,7 @@ import styles from './ThemePanel.module.css'
 
 export default function ThemePanel() {
   const { t } = useTranslation('panels')
+  const [slidersLocked, setSlidersLocked] = useState(() => window.matchMedia('(pointer: coarse)').matches)
   const theme = useStore((s) => s.theme) as ThemeConfig | null
   const setTheme = useStore((s) => s.setTheme)
   const hasExtensionOverrides = useStore((s) =>
@@ -149,9 +150,20 @@ export default function ThemePanel() {
 
       <ExtensionThemes />
 
+      <button
+        type="button"
+        className={`${styles.actionBtn} ${styles.sliderLockBtn}`}
+        aria-pressed={slidersLocked}
+        onClick={() => setSlidersLocked((locked) => !locked)}
+      >
+        {slidersLocked ? <Lock size={16} /> : <Unlock size={16} />}
+        {t(slidersLocked ? 'themePanel.unlockSliders' : 'themePanel.lockSliders')}
+      </button>
+
       <section className={styles.section}>
         <h4 className={styles.sectionLabel}>{t('themePanel.accentColor')}</h4>
         <AccentPicker
+          slidersLocked={slidersLocked}
           hue={current.accent.h}
           saturation={current.accent.s}
           luminance={current.accent.l}
@@ -170,6 +182,7 @@ export default function ThemePanel() {
       <section className={styles.section}>
         <h4 className={styles.sectionLabel}>{t('themePanel.controls')}</h4>
         <DepthControls
+          slidersLocked={slidersLocked}
           radiusScale={current.radiusScale}
           enableGlass={current.enableGlass}
           fontScale={current.fontScale}

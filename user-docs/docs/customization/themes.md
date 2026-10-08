@@ -55,6 +55,12 @@ Enables a frosted-glass look with backdrop blur on panels, modals, and headers. 
 
 ---
 
+## Locking Theme Sliders
+
+Use **Lock sliders** in the Theme Panel to prevent accidental changes to Corner Radius, Hue, Saturation, Luminance, Font Scale, and UI Scale while scrolling. Touch devices start with these sliders locked when the panel opens. Click **Unlock sliders** to adjust them, then lock them again when finished. Desktop sliders start unlocked.
+
+---
+
 ## Preset Themes
 
 The Theme Panel includes a grid of pre-built themes you can apply with one click. These set a coordinated combination of mode, accent color, base colors, and other settings.

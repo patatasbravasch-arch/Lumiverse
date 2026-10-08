@@ -42,6 +42,11 @@
   transition: all var(--lumiverse-transition-fast);
 }
 
+.sliderLockBtn {
+  min-height: 44px;
+  flex: none;
+}
+
 .actionBtn:hover {
   background: var(--lumiverse-fill);
   color: var(--lumiverse-text);
