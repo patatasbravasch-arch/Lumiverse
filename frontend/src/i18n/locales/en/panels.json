@@ -2884,6 +2884,8 @@
     }
   },
   "themePanel": {
+    "lockControls": "Lock controls",
+    "unlockControls": "Unlock controls",
     "lockSliders": "Lock sliders",
     "unlockSliders": "Unlock sliders",
     "mode": "Mode",

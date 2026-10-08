@@ -2618,6 +2618,8 @@
     }
   },
   "themePanel": {
+    "lockControls": "Verrouiller les réglages",
+    "unlockControls": "Déverrouiller les réglages",
     "lockSliders": "Verrouiller les curseurs",
     "unlockSliders": "Déverrouiller les curseurs",
     "mode": "Mode",

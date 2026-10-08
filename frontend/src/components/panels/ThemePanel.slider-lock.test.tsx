@@ -22,9 +22,10 @@ mock.module('@/store', () => ({ useStore: Object.assign((selector: (s: typeof st
 mock.module('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 mock.module('@/hooks/useThemePackActions', () => ({ useThemePackActions: () => ({ handleExportPack: () => {}, handleImportPack: () => {} }) }))
 mock.module('@/hooks/useThemeApplicator', () => ({ resolveMode: () => 'dark' }))
-for (const component of ['ModeSelector', 'PresetGrid', 'SavedThemes', 'ExtensionThemes', 'BaseColorPicker']) {
+for (const component of ['ModeSelector', 'PresetGrid', 'SavedThemes', 'ExtensionThemes']) {
   mock.module(`./theme-panel/${component}`, () => ({ default: () => null }))
 }
+mock.module('./theme-panel/BaseColorPicker', () => ({ default: ({ onChange }: { onChange: (value: { primary: string }) => void }) => <button onClick={() => onChange({ primary: '#ffffff' })}>Primary editor</button> }))
 const { default: ThemePanel } = await import('./ThemePanel')
 let root: Root
 let host: HTMLElement
@@ -57,4 +58,29 @@ test('keeps desktop sliders unlocked until explicitly locked', () => {
   expect(Array.from(host.querySelectorAll<HTMLInputElement>('input[type="range"]')).every((input) => !input.disabled)).toBe(true)
   act(() => host.querySelector<HTMLButtonElement>('button[aria-pressed]')!.click())
   expect(Array.from(host.querySelectorAll<HTMLInputElement>('input[type="range"]')).every((input) => input.disabled)).toBe(true)
+})
+
+test('each editing section has a synchronized unlock button and protects primary colors', () => {
+  coarse = true
+  act(() => root.render(<ThemePanel />))
+  const buttons = Array.from(host.querySelectorAll<HTMLButtonElement>('button[aria-pressed]'))
+  expect(buttons).toHaveLength(3)
+  expect(buttons.every((button) => button.parentElement?.tagName === 'SECTION')).toBe(true)
+  const swatches = Array.from(host.querySelectorAll<HTMLButtonElement>('button[aria-label^="hue:"]'))
+  expect(swatches).toHaveLength(10)
+  expect(swatches.every((button) => button.disabled)).toBe(true)
+  const primary = host.querySelector<HTMLButtonElement>('fieldset button')!
+  expect(primary.matches(':disabled')).toBe(true)
+  expect(primary.closest('fieldset')?.hasAttribute('inert')).toBe(true)
+  act(() => { swatches[0].click(); primary.click() })
+  expect(setTheme).not.toHaveBeenCalled()
+  act(() => buttons[2].click())
+  expect(buttons.every((button) => button.getAttribute('aria-pressed') === 'false')).toBe(true)
+  expect(swatches.every((button) => !button.disabled)).toBe(true)
+  expect(primary.matches(':disabled')).toBe(false)
+  expect(primary.closest('fieldset')?.hasAttribute('inert')).toBe(false)
+  act(() => primary.click())
+  expect(setTheme).toHaveBeenCalledTimes(1)
+  act(() => swatches[0].click())
+  expect(setTheme).toHaveBeenCalledTimes(2)
 })

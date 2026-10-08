@@ -89,6 +89,8 @@ export default function AccentPicker({ hue, saturation, luminance, onChange, sli
           <button
             key={h}
             type="button"
+            disabled={slidersLocked}
+            aria-label={t('hue') + ': ' + h}
             className={clsx(styles.swatch, hue === h && !customOpen && styles.swatchActive)}
             style={{ background: `hsl(${h}, ${saturation}%, 65%)` }}
             onClick={() => {

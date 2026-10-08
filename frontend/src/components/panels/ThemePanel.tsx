@@ -134,6 +134,18 @@ export default function ThemePanel() {
     })
   }, [getLatest, addSavedTheme])
 
+  const lockButton = (
+    <button
+      type="button"
+      className={`${styles.actionBtn} ${styles.sliderLockBtn}`}
+      aria-pressed={slidersLocked}
+      onClick={() => setSlidersLocked((locked) => !locked)}
+    >
+      {slidersLocked ? <Lock size={16} /> : <Unlock size={16} />}
+      {t(slidersLocked ? 'themePanel.unlockControls' : 'themePanel.lockControls')}
+    </button>
+  )
+
   return (
     <div className={styles.panel}>
       <section className={styles.section}>
@@ -150,18 +162,9 @@ export default function ThemePanel() {
 
       <ExtensionThemes />
 
-      <button
-        type="button"
-        className={`${styles.actionBtn} ${styles.sliderLockBtn}`}
-        aria-pressed={slidersLocked}
-        onClick={() => setSlidersLocked((locked) => !locked)}
-      >
-        {slidersLocked ? <Lock size={16} /> : <Unlock size={16} />}
-        {t(slidersLocked ? 'themePanel.unlockSliders' : 'themePanel.lockSliders')}
-      </button>
-
       <section className={styles.section}>
         <h4 className={styles.sectionLabel}>{t('themePanel.accentColor')}</h4>
+        {lockButton}
         <AccentPicker
           slidersLocked={slidersLocked}
           hue={current.accent.h}
@@ -173,14 +176,18 @@ export default function ThemePanel() {
 
       <section className={styles.section}>
         <h4 className={styles.sectionLabel}>{t('themePanel.baseColors')}</h4>
-        <BaseColorPicker
-          baseColors={current.baseColorsByMode?.[resolvedMode] ?? current.baseColors ?? {}}
-          onChange={handleBaseColorsChange}
-        />
+        {lockButton}
+        <fieldset disabled={slidersLocked} inert={slidersLocked} className={styles.colorControls}>
+          <BaseColorPicker
+            baseColors={current.baseColorsByMode?.[resolvedMode] ?? current.baseColors ?? {}}
+            onChange={handleBaseColorsChange}
+          />
+        </fieldset>
       </section>
 
       <section className={styles.section}>
         <h4 className={styles.sectionLabel}>{t('themePanel.controls')}</h4>
+        {lockButton}
         <DepthControls
           slidersLocked={slidersLocked}
           radiusScale={current.radiusScale}
