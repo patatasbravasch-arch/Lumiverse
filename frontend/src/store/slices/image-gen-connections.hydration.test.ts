@@ -81,8 +81,12 @@ function pendingImageGeneration(store: AppStore): ImageGenSettings {
   }
 }
 
-function mockSettings(imageGeneration: ImageGenSettings, writes: Write[]) {
-  settingsApi.getAll = async () => [{ key: 'imageGeneration', value: imageGeneration, updated_at: 1 }]
+function mockSettings(imageGeneration: ImageGenSettings, writes: Write[], withSavedLanguage = true) {
+  settingsApi.getAll = async () => [
+    { key: 'imageGeneration', value: imageGeneration, updated_at: 1 },
+    // Image-only persistence assertions use an already initialized account.
+    ...(withSavedLanguage ? [{ key: 'uiLanguage', value: 'en', updated_at: 1 }] : []),
+  ]
   settingsApi.put = async (key, value) => {
     writes.push({ kind: 'put', key, value })
     return { key, value, updated_at: 1 }
@@ -107,6 +111,32 @@ afterEach(() => {
 })
 
 describe('image connection hydration', () => {
+  test('initializes account language without losing a bridged image setting', async () => {
+    const storage = installLocalStorage()
+    const store = createStore()
+    const pending = pendingImageGeneration(store)
+    const writes: Write[] = []
+    mockSettings(pending, writes, false)
+    storage.set(PENDING_SETTINGS_KEY, JSON.stringify({ imageGeneration: pending }))
+
+    await store.loadSettings()
+    expect(store.uiLanguage).toBe('en')
+    expect(store.imageGeneration.activeImageGenConnectionId).toBe('missing-image-connection')
+
+    store.setImageGenProfiles([])
+    await flushSettingsNow()
+    await settlePersistence()
+
+    expect(writes).toEqual([{
+      kind: 'putMany',
+      value: {
+        uiLanguage: 'en',
+        imageGeneration: { ...pending, activeImageGenConnectionId: null },
+      },
+    }])
+    expect(storage.get(PENDING_SETTINGS_KEY)).toBeUndefined()
+  })
+
   test('updates every saved theme-pack layer and commits it immediately', async () => {
     installLocalStorage()
     const store = createStore()
